@@ -1,11 +1,12 @@
 TDCharacterController2D
 ===========
 
-A top down character controller for interacting with Unity's 2D colliders, without the need for a non-kinematic Rigidbody. Built to replicate the default CharacterController's [Move()](http://docs.unity3d.com/ScriptReference/CharacterController.Move.html) function.
+A top down character controller for interacting with Unity's 2D colliders, without the need for a non-kinematic Rigidbody. Built to replicate the default [CharacterController](http://docs.unity3d.com/ScriptReference/CharacterController.html)'s [Move()](http://docs.unity3d.com/ScriptReference/CharacterController.Move.html) function.
 
-### Usage
+Usage
+-----
 
-Add TDCharacterController2D to a GameObject. A Rigidbody2D and CircleCollider2D will added automatically, the Rigidbody2D will be set to kinematic at run time, but feel free to set it in the Inspector yourself. Set collision layers in the Inspector. Move the TDCharacterController2D with
+Add TDCharacterController2D.cs to a GameObject. A [Rigidbody2D](http://docs.unity3d.com/ScriptReference/Rigidbody2D.html) and [CircleCollider2D](http://docs.unity3d.com/ScriptReference/CircleCollider2D.html) will added automatically, the Rigidbody2D will be set to [isKinematic](http://docs.unity3d.com/ScriptReference/Rigidbody2D-isKinematic.html) at run time, but feel free to set it in the Inspector yourself. Set collisionLayers in the Inspector. Move with
 
 ```
 TDCharacterController2D.Move(Vector2 motion);
@@ -13,11 +14,12 @@ TDCharacterController2D.Move(Vector2 motion);
 
 And it'll take care of the rest.
 
-### Team
+Team
+-----
 
-**Created by**: Sebastiao Almeida - [sebastiao.strd@gmail.com](mailto:sebastiao.strd@gmail.com)
+**Created by:** Sebastiao Almeida - [sebastiao.strd@gmail.com](mailto:sebastiao.strd@gmail.com)
 
-**Small additions**: 
+**Small additions:**
 * Adam Scoble - [adam.scoble@gmail.com](mailto:adam.scoble@gmail.com)
 
 License
