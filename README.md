@@ -6,7 +6,7 @@ A top down character controller for interacting with Unity's 2D colliders, witho
 Usage
 -----
 
-Add TDCharacterController2D.cs to a GameObject. A [Rigidbody2D](http://docs.unity3d.com/ScriptReference/Rigidbody2D.html) and [CircleCollider2D](http://docs.unity3d.com/ScriptReference/CircleCollider2D.html) will added automatically, the Rigidbody2D will be set to [isKinematic](http://docs.unity3d.com/ScriptReference/Rigidbody2D-isKinematic.html) at run time, but feel free to set it in the Inspector yourself. Set collisionLayers in the Inspector. Move with
+Add TDCharacterController2D.cs to a GameObject. A [Rigidbody2D](http://docs.unity3d.com/ScriptReference/Rigidbody2D.html) and [CircleCollider2D](http://docs.unity3d.com/ScriptReference/CircleCollider2D.html) will be added automatically, the Rigidbody2D will be set to [isKinematic](http://docs.unity3d.com/ScriptReference/Rigidbody2D-isKinematic.html) at run time, but feel free to set it in the Inspector yourself. Set collisionLayers in the Inspector. Move with
 
 ```
 TDCharacterController2D.Move(Vector2 motion);
