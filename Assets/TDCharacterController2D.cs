@@ -7,7 +7,7 @@ public class TDCharacterController2D : MonoBehaviour {
 	private Transform _transform;
 
 	[Tooltip("Layers to test for collisions. The TDCharacterController2D will walk through anything not on these layers.")]
-	public LayerMask collisionLayers = -1;
+	public LayerMask collisionLayers;
 	[Tooltip("Used in Update() to check the desired position in advance, creating a buffer zone around the collider. Lower values decrease the 'bouncing' behavior sometimes observed on tight corners.")]
     public float raycastLead = 0.15f;
 
@@ -30,7 +30,9 @@ public class TDCharacterController2D : MonoBehaviour {
 	/// <summary>Attempts to move the controller by <paramref name="motion"/>, the motion will only be constained by collisions. It will slide along colliders.</summary>
 	/// <param name="motion">The desired motion from the current position.</param>
 	public void Move(Vector2 motion) {
-		_transform.position = GetValidPosition(motion, 10f, 20f, 40f, 60f, 80f);          
+        Vector3 movePosition = GetValidPosition(motion, 10f, 20f, 40f, 60f, 80f);
+        movePosition.z = _transform.position.z;
+        _transform.position = movePosition;          
 	}
 
 	/// <summary>Returns a valid Vector2 position based on <paramref name="motion"/> from the current position. Collisions are tested for in both <paramref name="motion"/> + and - <paramref name="testAngles"/>.</summary>
