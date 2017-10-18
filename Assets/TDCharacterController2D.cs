@@ -15,7 +15,9 @@ public class TDCharacterController2D : MonoBehaviour {
 
 	CircleCollider2D _collider;
 	float _radius;
-	readonly RaycastHit2D[] _hits = new RaycastHit2D[2];
+	readonly RaycastHit2D[] _collisions = new RaycastHit2D[2];
+	readonly Collider2D[] _overlaps = new Collider2D[2];
+
 	float _sqrMinimumMovementThreshold;
 
     void Awake() {
@@ -53,12 +55,14 @@ public class TDCharacterController2D : MonoBehaviour {
 		Vector2 direction = motion.normalized;
 		float distance = motion.magnitude;
 		
-		int collisionCount = Physics2D.CircleCastNonAlloc(Transform.position, _radius, direction, _hits, distance, CollisionLayers);
+		int collisionCount = Physics2D.CircleCastNonAlloc(Transform.position, _radius, direction, _collisions, distance, CollisionLayers);
+
+		if (collisionCount == 0 || collisionCount == 1 && _collisions[0].collider == _collider) {
+			return (Vector2)Transform.position + motion;
+		}
+
+		RaycastHit2D hit = _collisions.FirstOrDefault(h => h.collider != _collider);
 		
-		if (collisionCount == 0) { return (Vector2)Transform.position + motion; }
-
-		RaycastHit2D hit = _hits.Where(h => h.collider != _collider).First(); // Get the first collider in the hits collection that isn't owned by this TDCharacterController2D
-
 		return GetValidPositionFromCollision(direction, distance, hit);
 	}
 
@@ -76,9 +80,11 @@ public class TDCharacterController2D : MonoBehaviour {
 		Vector2 adjustedDirection = Quaternion.AngleAxis(normalizedAngle < 0 ? -90 : 90, Vector3.back) * hit.normal; // Rotate the collision's normal by 90 degrees towards the direction of movement to adjust direction
 		adjustedDirection *= remainingDistance;
 
-		if (Physics2D.OverlapCircle(positionAtCollision + adjustedDirection, _radius, CollisionLayers) != null) { return positionAtCollision; }
+		int overlapCount = Physics2D.OverlapCircleNonAlloc(positionAtCollision + adjustedDirection, _radius, _overlaps, CollisionLayers);
 
-		return positionAtCollision + adjustedDirection;
+		if (overlapCount == 0 || (overlapCount == 1 && _overlaps[0] == _collider)) { return positionAtCollision + adjustedDirection; }
+
+		return positionAtCollision;
 	}
 
 	/// <summary>Returns a signed, normalized angle between <paramref name="a"/> and <paramref name="b"/>. 0 means they are the same, while -1 and 1 mean that <paramref name="b"/> is 90 degrees right or left from <paramref name="a"/>.</summary>
