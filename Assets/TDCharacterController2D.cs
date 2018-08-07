@@ -26,7 +26,7 @@ public class TDCharacterController2D : MonoBehaviour {
 
 	    _radius = _collider.radius + RadiusBuffer;
 	    _sqrMinimumMovementThreshold = MinimumMovementThreshold * MinimumMovementThreshold;
-	    
+
 	    SetRigidbodyKinematic();
 	}
 
@@ -37,7 +37,7 @@ public class TDCharacterController2D : MonoBehaviour {
 			Debug.LogWarning("No Rigidbody found on GameObject or in parent of TDCharacterController2D.");
 			return;
 		}
-		
+
 		rigidbody2D.isKinematic = true;
 	}
 
@@ -47,22 +47,20 @@ public class TDCharacterController2D : MonoBehaviour {
 		newPosition.z = Transform.position.z;
 
 		if ((newPosition - Transform.position).sqrMagnitude < _sqrMinimumMovementThreshold) { return; }
-		
-		Transform.position = newPosition;          
+
+		Transform.position = newPosition;
 	}
 
 	Vector2 GetNewPosition(Vector2 motion) {
 		Vector2 direction = motion.normalized;
 		float distance = motion.magnitude;
-		
+
 		int collisionCount = Physics2D.CircleCastNonAlloc(Transform.position, _radius, direction, _collisions, distance, CollisionLayers);
 
-		if (collisionCount == 0 || collisionCount == 1 && _collisions[0].collider == _collider) {
-			return (Vector2)Transform.position + motion;
-		}
+		if (IsPositionValid(collisionCount, _collisions[0].collider)) { return (Vector2)Transform.position + motion; }
 
 		RaycastHit2D hit = _collisions.FirstOrDefault(h => h.collider != _collider);
-		
+
 		return GetValidPositionFromCollision(direction, distance, hit);
 	}
 
@@ -73,18 +71,29 @@ public class TDCharacterController2D : MonoBehaviour {
 		float normalizedAngle = GetNormalizedAngle(-direction, hit.normal);
 
 		if (Math.Abs(normalizedAngle) < 0.01f) { return positionAtCollision; } // We have walked straight into the collision's normal
-		
+
 		float remainingDistance = distance * (1 - hit.fraction); // The amount of motion remaining at the point of collision
 		remainingDistance *= Mathf.Abs(normalizedAngle); // Reduce the remaining distance according to the angle of the collision (moving directly into a collider's normal would result in 0 remaining distance)
-		
+
 		Vector2 adjustedDirection = Quaternion.AngleAxis(normalizedAngle < 0 ? -90 : 90, Vector3.back) * hit.normal; // Rotate the collision's normal by 90 degrees towards the direction of movement to adjust direction
 		adjustedDirection *= remainingDistance;
 
-		int overlapCount = Physics2D.OverlapCircleNonAlloc(positionAtCollision + adjustedDirection, _radius, _overlaps, CollisionLayers);
+		Vector2 adjustedPosition = positionAtCollision + adjustedDirection;
 
-		if (overlapCount == 0 || (overlapCount == 1 && _overlaps[0] == _collider)) { return positionAtCollision + adjustedDirection; }
+		int overlapCount = Physics2D.OverlapCircleNonAlloc(adjustedPosition, _radius, _overlaps, CollisionLayers);
 
-		return positionAtCollision;
+		if(IsPositionValid(overlapCount, _overlaps[0])) { return adjustedPosition; }
+
+		overlapCount = Physics2D.OverlapCircleNonAlloc(positionAtCollision, _radius, _overlaps, CollisionLayers);
+
+		if (IsPositionValid(overlapCount, _overlaps[0])) { return positionAtCollision; }
+
+		return positionAtCollision + hit.normal * 0.1f;
+	}
+
+	/// <summary>Helper function to test if a position is empty or if the only collider present is owned by this <see cref="TDCharacterController2D"/>.</summary>
+	bool IsPositionValid(int colliderCountAtPosition, Collider2D firstColliderAtPosition) {
+		return colliderCountAtPosition == 0 || colliderCountAtPosition == 1 && firstColliderAtPosition == _collider;
 	}
 
 	/// <summary>Returns a signed, normalized angle between <paramref name="a"/> and <paramref name="b"/>. 0 means they are the same, while -1 and 1 mean that <paramref name="b"/> is 90 degrees right or left from <paramref name="a"/>.</summary>
