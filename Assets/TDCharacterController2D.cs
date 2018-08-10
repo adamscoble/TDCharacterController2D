@@ -9,23 +9,24 @@ public class TDCharacterController2D : MonoBehaviour {
 	[Tooltip("Layers to test for collisions. The TDCharacterController2D will move through anything not on these layers.")]
 	public LayerMask CollisionLayers;
 	[Tooltip("Additional distance between the CircleCollider2D's radius and collision testing.")]
-    public float RadiusBuffer = 0;
-	[Tooltip("The minimum distance the TDCharacterController2D requires to move. Can prevent slight stutter in certain scenarios (i.e. moving against corners).")]
-	public float MinimumMovementThreshold = 0.1f;
+    public float RadiusBuffer;
 
 	CircleCollider2D _collider;
 	float _radius;
+	/// <summary>The minimum distance the TDCharacterController2D requires to move. Can prevent slight stutter in certain scenarios (i.e. moving against corners).</summary>
+	float _minimumMovementThreshold;
+	float _sqrMinimumMovementThreshold;
+
 	readonly RaycastHit2D[] _collisions = new RaycastHit2D[2];
 	readonly Collider2D[] _overlaps = new Collider2D[2];
 
-	float _sqrMinimumMovementThreshold;
-
     void Awake() {
-	    Transform = Transform ?? transform;
+	    if (Transform == null) { Transform = transform; }
 	    _collider = GetComponent<CircleCollider2D>();
 
 	    _radius = _collider.radius + RadiusBuffer;
-	    _sqrMinimumMovementThreshold = MinimumMovementThreshold * MinimumMovementThreshold;
+	    _minimumMovementThreshold = _radius / 50f;
+	    _sqrMinimumMovementThreshold = _minimumMovementThreshold * _minimumMovementThreshold;
 
 	    SetRigidbodyKinematic();
 	}
@@ -66,7 +67,7 @@ public class TDCharacterController2D : MonoBehaviour {
 
 	Vector2 GetValidPositionFromCollision(Vector2 direction, float distance, RaycastHit2D hit) {
 		Vector2 positionAtCollision = (Vector2)Transform.position + (direction * (distance * hit.fraction));
-		positionAtCollision += hit.normal * 0.1f; // Move slightly further away from the point of collision to account for inaccuracy
+		positionAtCollision += hit.normal * _minimumMovementThreshold; // Move slightly further away from the point of collision to account for inaccuracy
 
 		float normalizedAngle = GetNormalizedAngle(-direction, hit.normal);
 
@@ -88,7 +89,7 @@ public class TDCharacterController2D : MonoBehaviour {
 
 		if (IsPositionValid(overlapCount, _overlaps[0])) { return positionAtCollision; }
 
-		return positionAtCollision + hit.normal * 0.1f;
+		return positionAtCollision + hit.normal * _minimumMovementThreshold;
 	}
 
 	/// <summary>Helper function to test if a position is empty or if the only collider present is owned by this <see cref="TDCharacterController2D"/>.</summary>
