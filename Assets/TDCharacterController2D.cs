@@ -53,20 +53,21 @@ public class TDCharacterController2D : MonoBehaviour {
 	}
 
 	Vector2 GetNewPosition(Vector2 motion) {
+		Vector2 position = Transform.position;
 		Vector2 direction = motion.normalized;
 		float distance = motion.magnitude;
 
-		int collisionCount = Physics2D.CircleCastNonAlloc(Transform.position, _radius, direction, _collisions, distance, CollisionLayers);
+		int collisionCount = Physics2D.CircleCastNonAlloc(position, _radius, direction, _collisions, distance, CollisionLayers);
 
-		if (IsPositionValid(collisionCount, _collisions[0].collider)) { return (Vector2)Transform.position + motion; }
+		if (IsPositionValid(collisionCount, _collisions[0].collider)) { return position + motion; }
 
 		RaycastHit2D hit = _collisions.FirstOrDefault(h => h.collider != _collider);
 
-		return GetValidPositionFromCollision(direction, distance, hit);
+		return GetValidPositionFromCollision(position, direction, distance, hit);
 	}
 
-	Vector2 GetValidPositionFromCollision(Vector2 direction, float distance, RaycastHit2D hit) {
-		Vector2 positionAtCollision = (Vector2)Transform.position + (direction * (distance * hit.fraction));
+	Vector2 GetValidPositionFromCollision(Vector2 position, Vector2 direction, float distance, RaycastHit2D hit) {
+		Vector2 positionAtCollision = position + (direction * (distance * hit.fraction));
 		positionAtCollision += hit.normal * _minimumMovementThreshold; // Move slightly further away from the point of collision to account for inaccuracy
 
 		float normalizedAngle = GetNormalizedAngle(-direction, hit.normal);
