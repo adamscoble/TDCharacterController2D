@@ -44,30 +44,30 @@ public class TDCharacterController2D : MonoBehaviour {
 
 	/// <summary>Attempts to move the controller by <paramref name="motion"/>, the motion will only be constained by collisions. It will slide along colliders.</summary>
 	public void Move(Vector2 motion) {
-		Vector3 newPosition = GetNewPosition(motion);
-		newPosition.z = Transform.position.z;
+		Vector3 currentPosition = Transform.position;
+		Vector3 newPosition = GetNewPosition(currentPosition, motion);
+		newPosition.z = currentPosition.z;
 
-		if ((newPosition - Transform.position).sqrMagnitude < _sqrMinimumMovementThreshold) { return; }
+		if ((newPosition - currentPosition).sqrMagnitude < _sqrMinimumMovementThreshold) { return; }
 
 		Transform.position = newPosition;
 	}
 
-	Vector2 GetNewPosition(Vector2 motion) {
-		Vector2 position = Transform.position;
+	Vector2 GetNewPosition(Vector2 currentPosition, Vector2 motion) {
 		Vector2 direction = motion.normalized;
 		float distance = motion.magnitude;
 
-		int collisionCount = Physics2D.CircleCastNonAlloc(position, _radius, direction, _collisions, distance, CollisionLayers);
+		int collisionCount = Physics2D.CircleCastNonAlloc(currentPosition, _radius, direction, _collisions, distance, CollisionLayers);
 
-		if (IsPositionValid(collisionCount, _collisions[0].collider)) { return position + motion; }
+		if (IsPositionValid(collisionCount, _collisions[0].collider)) { return currentPosition + motion; }
 
 		RaycastHit2D hit = _collisions.FirstOrDefault(h => h.collider != _collider);
 
-		return GetValidPositionFromCollision(position, direction, distance, hit);
+		return GetValidPositionFromCollision(currentPosition, direction, distance, hit);
 	}
 
-	Vector2 GetValidPositionFromCollision(Vector2 position, Vector2 direction, float distance, RaycastHit2D hit) {
-		Vector2 positionAtCollision = position + (direction * (distance * hit.fraction));
+	Vector2 GetValidPositionFromCollision(Vector2 currentPosition, Vector2 direction, float distance, RaycastHit2D hit) {
+		Vector2 positionAtCollision = currentPosition + (direction * (distance * hit.fraction));
 		positionAtCollision += hit.normal * _minimumMovementThreshold; // Move slightly further away from the point of collision to account for inaccuracy
 
 		float normalizedAngle = GetNormalizedAngle(-direction, hit.normal);
